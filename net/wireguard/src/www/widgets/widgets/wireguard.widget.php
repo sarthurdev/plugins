@@ -47,6 +47,7 @@ $empty = strlen($data) == 0;
 
 <?php if (!$empty):
     $handshakes = explode("\n", $data);
+    $tz = new DateTimeZone($config['system']['timezone']);
 
     foreach ($handshakes as $handshake):
         $item = explode("\t", $handshake);
@@ -55,7 +56,8 @@ $empty = strlen($data) == 0;
         $latest = "-";
         if ($epoch > 0):
             $dt = new DateTime("@$epoch");
-            $latest = $dt->format(gettext("Y-m-d H:i:sP"));
+            $dt->setTimezone($tz);
+            $latest = $dt->format(gettext("Y-m-d H:i:s"));
         endif; ?>
 
     <tr>
