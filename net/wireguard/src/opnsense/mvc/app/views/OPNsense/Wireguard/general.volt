@@ -108,7 +108,17 @@ POSSIBILITY OF SUCH DAMAGE.
       <pre id="listshowconf"></pre>
     </div>
     <div id="showhandshake" class="tab-pane fade in">
-      <pre id="listshowhandshake"></pre>
+        <table id="grid-handshakes" class="table table-responsive">
+            <thead>
+                <tr>
+                    <th data-column-id="iface">{{ lang._('Interface') }}</th>
+                    <th data-column-id="peer">{{ lang._('Peer') }}</th>
+                    <th data-column-id="handshake" data-formatter="datetime">{{ lang._('Handshake') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -126,7 +136,19 @@ function update_showconf() {
 
 function update_showhandshake() {
     ajaxCall(url="/api/wireguard/service/showhandshake", sendData={}, callback=function(data,status) {
-        $("#listshowhandshake").text(data['response']);
+        let rows = data['response'].trim().split("\n");
+        let output = [];
+
+        for (let row of rows) {
+            let items = row.split("\t");
+            output.push({
+                'iface': items[0],
+                'peer': items[1],
+                'handshake': (items[2] ? (new Date(items[2]*1000).toString()) : '-')
+            });
+        }
+
+        $("#grid-handshakes").bootgrid("clear").bootgrid('append', output);
     });
 }
 
@@ -157,7 +179,11 @@ $( document ).ready(function() {
         }
     );
 
+    $("#grid-handshakes").bootgrid();
+
     // Call function update_neighbor with a auto-refresh of 5 seconds
+    update_showconf();
+    update_showhandshake();
     setInterval(update_showconf, 5000);
     setInterval(update_showhandshake, 5000);
 
